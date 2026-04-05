@@ -1,0 +1,64 @@
+
+function provideLiveCommentary(horses, prog) {
+  if (!window.commentary || !window.commentary.enabled) return;
+  
+  const now = performance.now();
+  
+  // Don't comment too frequently (every 8 seconds minimum)
+  if (now - lastCommentaryTime < 8000) return;
+  
+  const sorted = [...horses].sort((a, b) => b.x - a.x);
+  const leader = sorted[0];
+  const second = sorted[1];
+  const third = sorted[2];
+  
+  // Calculate positions
+  const leaderGap = (leader.x - second.x) / 40; // Gap in lengths
+  
+  // Early race (0-30%)
+  if (prog < 0.30) {
+    const comments = [
+      `${leader.name} takes the early lead!`,
+      `It's ${leader.name} in front, followed by ${second.name}!`,
+      `${leader.name} breaks well from the gate!`,
+      `Early pace being set by ${leader.name}!`
+    ];
+    window.commentary.speak(comments[Math.floor(Math.random() * comments.length)]);
+  }
+  
+  // Mid race (30-70%)
+  else if (prog < 0.70) {
+    if (leader !== lastLeader && lastLeader) {
+      window.commentary.speak(`${leader.name} takes over the lead from ${lastLeader.name}!`, 'high');
+    } else if (leaderGap < 0.5) {
+      window.commentary.speak(`It's a tight race! ${leader.name}, ${second.name}, and ${third.name} all bunched together!`);
+    } else if (leaderGap > 2) {
+      window.commentary.speak(`${leader.name} opening up a clear lead!`);
+    } else {
+      const comments = [
+        `${leader.name} leads with ${second.name} tracking closely!`,
+        `${second.name} is right there challenging ${leader.name}!`,
+        `${leader.name} in front, but ${second.name} is making a move!`
+      ];
+      window.commentary.speak(comments[Math.floor(Math.random() * comments.length)]);
+    }
+  }
+  
+  // Final stretch (70-95%)
+  else if (prog < 0.95) {
+    if (leaderGap < 1) {
+      const comments = [
+        `They're neck and neck! ${leader.name} and ${second.name} battling it out!`,
+        `This is going to be close! ${leader.name} narrowly ahead of ${second.name}!`,
+        `${second.name} is charging! Can they catch ${leader.name}?`,
+        `It's a photo finish in the making!`
+      ];
+      window.commentary.speak(comments[Math.floor(Math.random() * comments.length)], 'high');
+    } else {
+      window.commentary.speak(`${leader.name} pulling away in the final stretch!`, 'high');
+    }
+  }
+  
+  lastLeader = leader;
+  lastCommentaryTime = now;
+}

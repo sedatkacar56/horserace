@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Horse Racing (Organized)</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Bottom overflow track (mini horses) -->
+  <canvas id="overflowCanvas" width="1200" height="160"
+    style="border:1px solid #654321; background:#88bb55; margin-top:10px;">
+  </canvas>
+
+  <!-- Settings Panel -->
+  <div id="ui">
+    <h3>🏇 Sprite Horse Racing</h3>
+    <div class="row">
+      <label>Frames</label>
+      <input id="framesInput" type="number" min="2" max="32" value="6" />
+    </div>
+    <div class="row">
+      <label>Scale</label>
+      <input id="scaleInput" type="number" min="0.2" max="4" step="0.1" value="1" />
+    </div>
+    <hr>
+    <h4>🎨 Sprite</h4>
+    <div class="row">
+      <label>Files</label>
+      <input id="spriteFiles" type="file" accept="image/*" multiple>
+    </div>
+    <div id="spritePreview" class="tiny"></div>
+    <div class="tiny">Tip: If the horse looks too small/large, change <b>Scale</b>.</div>
+    <hr>
+    <div id="leaderboard"></div>
+    <hr>
+    <div id="completeStatsInline" class="hidden"></div>
+    <hr>
+    <h4>💾 Export Settings</h4>
+    <button id="downloadRaceHistoryBtn" class="download-btn">Download racehistory.js</button>
+  </div>
+
+  <!-- Control Buttons -->
+  <div id="controls">
+    <div id="whipCountContainer"></div>
+    <button id="startBtn" disabled>Start Race</button>
+    <button id="resetBtn" disabled>Reset Race</button>
+    <button id="pauseBtn" disabled>Pause</button>
+	
+	<div style="margin-top:10px;">
+  <label style="font-size:12px; margin-right:8px;">Speed:</label>
+  <button id="speed1x" style="padding:6px 12px; margin:2px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">1x</button>
+  <button id="speed2x" style="padding:6px 12px; margin:2px; background:#2196F3; color:white; border:none; border-radius:4px; cursor:pointer;">2x</button>
+  <button id="speed3x" style="padding:6px 12px; margin:2px; background:#FF9800; color:white; border:none; border-radius:4px; cursor:pointer;">3x</button>
+   <button id="speed10x" style="padding:6px 12px; margin:2px;">10x</button>
+
+</div>
+
+
+
+<!-- Custom Whip Panel -->
+<div id="customWhipPanel" 
+     style="margin-top:15px; padding:12px; background:rgba(255,255,255,0.1);
+            border-radius:10px; color:white;">
+
+  <label style="font-weight:bold; font-size:16px;">
+    Whip Mode:
+  </label>
+
+  <select id="whipMode" 
+          style="margin-left:10px; padding:6px; font-size:15px;">
+    <option value="global">One Value For All Players</option>
+    <option value="custom">Custom Whip Amounts</option>
+  </select>
+
+  <div id="customWhipInputs" style="margin-top:10px; display:none;">
+    <div style="margin-bottom:8px;">
+      <label>P1 Whips:</label>
+      <input id="p1WhipInput" type="number" min="1" max="9999" value="10"
+             style="width:70px; margin-left:10px;">
+    </div>
+    <div style="margin-bottom:8px;">
+      <label>P2 Whips:</label>
+      <input id="p2WhipInput" type="number" min="1" max="9999" value="10"
+             style="width:70px; margin-left:10px;">
+    </div>
+    <div>
+      <label>P3 Whips:</label>
+      <input id="p3WhipInput" type="number" min="1" max="9999" value="10"
+             style="width:70px; margin-left:10px;">
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+    <span id="loadStatus" class="tiny">Loading sprites…</span>
+  </div>
+
+  <!-- Winner Modal -->
+  <div id="winner"></div>
+
+  <!-- Race Results Panel -->
+  <div id="raceResults"></div>
+
+<!-- Whip HUD -->
+<div id="whipHUD">
+
+  <!-- PLAYER 1 -->
+  <div class="hud p1">
+    <div class="hud-title">PLAYER 1</div>
+    <div id="p1HorseName" class="hud-horse-name">-</div>
+
+    <div id="p1WhipCount" class="hud-whip-count">Whips: 10</div>
+    <div id="p1SpurCount" class="hud-spur-count">⚡ Spurs: 3</div>
+    <div id="p1PressureCount" class="hud-pressure-count">🧿 Pressure: 5</div>
+
+    <div id="p1Cooldown" class="hud-cooldown"></div>
+  </div>
+
+  <!-- PLAYER 2 -->
+  <div class="hud p2">
+    <div class="hud-title">PLAYER 2</div>
+    <div id="p2HorseName" class="hud-horse-name">-</div>
+
+    <div id="p2WhipCount" class="hud-whip-count">Whips: 10</div>
+    <div id="p2SpurCount" class="hud-spur-count">⚡ Spurs: 3</div>
+    <div id="p2PressureCount" class="hud-pressure-count">🧿 Pressure: 5</div>
+
+    <div id="p2Cooldown" class="hud-cooldown"></div>
+  </div>
+
+  <!-- PLAYER 3 -->
+  <div class="hud p3">
+    <div class="hud-title">PLAYER 3</div>
+    <div id="p3HorseName" class="hud-horse-name">-</div>
+
+    <div id="p3WhipCount" class="hud-whip-count">Whips: 10</div>
+    <div id="p3SpurCount" class="hud-spur-count">⚡ Spurs: 3</div>
+    <div id="p3PressureCount" class="hud-pressure-count">🧿 Pressure: 5</div>
+
+    <div id="p3Cooldown" class="hud-cooldown"></div>
+  </div>
+
+</div>
+
+
+  Horse Selection Modal
+  <div id="horseSelection">
+    <h2 class="selection-title">🏇 Select Your Horses</h2>
+    <div class="selection-grid">
+      <div class="player-box p1-box">
+        <h3 class="player-title p1-title">PLAYER 1 (W Key)</h3>
+        <select id="p1HorseSelect" class="horse-select p1-select">
+          <option value="">Choose horse...</option>
+        </select>
+      <label><input type="checkbox" id="p1AI"> 🤖 AI Player</label>
+          </div>
+      <div class="player-box p2-box">
+        <h3 class="player-title p2-title">PLAYER 2 (I Key)</h3>
+        <select id="p2HorseSelect" class="horse-select p2-select">
+          <option value="">Choose horse...</option>
+        </select>
+		      <label><input type="checkbox" id="p2AI"> 🤖 AI Player</label>
+
+      </div>
+	  <div class="player-box p3-box">
+        <h3 class="player-title p1-title">PLAYER 3 (B Key)</h3>
+        <select id="p3HorseSelect" class="horse-select p3-select">
+          <option value="">Choose horse...</option>
+        </select>
+		      <label><input type="checkbox" id="p3AI"> 🤖 AI Player</label>
+
+      </div>
+    </div>
+	
+	 <label class="ai-toggle-label">
+    <input type="checkbox" id="enableRestAI">
+    🤖 Enable AI for all non-player horses
+  </label>
+    <button id="confirmSelection" class="confirm-btn">
+      ✅ Start Race (With Selected Players)
+    </button>
+    <button id="cancelSelection" class="cancel-btn">
+      Skip & Start Without Players
+    </button>
+  </div>
+
+
+
+
+
+
+  <!-- Stats Panel -->
+  <div id="statsPanel" class="hidden">
+    <div id="statsHeader">
+      🏆 All Horses Complete Stats
+      <span style="flex:1"></span>
+      <button id="closeStats" class="close-stats-btn">✕</button>
+    </div>
+    <div id="completeStats"></div>
+  </div>
+
+  <!-- Toggle Buttons -->
+  <button id="toggleUI" style="display:none;">Hide Settings ⚙️</button>
+  <button id="toggleStats" style="display:none;">Stats 📊</button>
+  <button id="toggleResultsBtn" style="display:none;">Show Results 📊</button>
+  
+  <!-- Race Menu Dropdown -->
+<!-- Race Menu Dropdown -->
+<div id="raceMenuContainer">
+  <button id="raceMenuBtn" class="raceMenuBtn">
+    🏁 Race Menu ▼
+  </button>
+
+  <div id="raceMenuPanel" class="raceMenuPanel hidden">
+    <div class="raceMenuItem" data-action="toggleUI">⚙️ Hide / Show Settings</div>
+    <div class="raceMenuItem" data-action="toggleStats">📊 Toggle Stats</div>
+    <div class="raceMenuItem" data-action="toggleResultsBtn">🏁 Show / Hide Results</div>
+    <div class="raceMenuItem" data-action="toggleAI">🎙️ AI Commentary</div>
+    <div class="raceMenuItem" data-action="toggleSound">🔊 Sound ON/OFF</div>
+  </div>
+</div>
+
+
+  
+<button id="toggleSound" style="position: fixed; bottom: 20px; left: 20px;  padding: 10px 15px; background: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer; display:none;font-size: 14px; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">🔊 Sound ON</button>
+  <!-- Scripts -->
+  <script src="js/data/horses.js"></script>
+  <script src="js/config/race_params.js"></script>
+  <script type ="module" src="js/core/sound-manager.js"></script> 
+  <script defer src="js/features/commentary-system.js?v=1.0"></script>
+  <script defer src="js/features/strategies/strategies.js?v=1.0"></script>
+
+  <!--<script defer src="js/features/strategies/strategies_array.js"></script>--><!-- NEW -->
+<script type="module" src="js/ui/sedat-ui/draggable.js"></script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  makeDraggable(
+    document.getElementById("raceMenuContainer"),
+    document.getElementById("raceMenuBtn")
+  );
+});
+</script>
+
+
+  <script type="module" src="js/main.js?v=1.0"></script>
+  
+<script>
+document.getElementById("raceMenuBtn").onclick = () => {
+  const panel = document.getElementById("raceMenuPanel");
+  panel.classList.toggle("hidden");
+};
+
+document.querySelectorAll(".raceMenuItem").forEach(item => {
+  item.onclick = () => {
+    const actionId = item.dataset.action;
+    const btn = document.getElementById(actionId);
+    if (btn) btn.click();
+
+    // close after clicking
+    document.getElementById("raceMenuPanel").classList.add("hidden");
+  };
+});
+
+</script>
+
+
+
+  
+</body>
+</html>
