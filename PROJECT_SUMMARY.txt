@@ -1,0 +1,96 @@
+====================================================
+HORSE RACE GAME - PROJECT SUMMARY
+====================================================
+
+LIVE URL: https://horserace-146.pages.dev/
+
+----------------------------------------------------
+PROJECT STRUCTURE
+----------------------------------------------------
+Main working folder (original, never touch):
+  C:\Users\skacar\Documents\horse_race\horserace_organizes
+
+Copy folder (working copy, safe to modify):
+  C:\Users\skacar\Documents\horse_race\horserace_organizesB
+
+Obfuscated build output (what gets deployed):
+  C:\Users\skacar\Documents\horse_race\horserace_organizesB\dist
+
+Private GitHub repo:
+  https://github.com/sedatkacar56/horserace.git (private)
+
+Cloudflare Pages project:
+  https://horserace-146.pages.dev/
+  Connected to GitHub repo (auto-deploys on push)
+
+----------------------------------------------------
+WHAT WAS DONE
+----------------------------------------------------
+1. The game is a pure frontend web game (HTML + CSS + JS + MP3 assets)
+   Total size: ~8.5MB
+
+2. Installed javascript-obfuscator locally in horserace_organizesB:
+     npm install javascript-obfuscator
+   (also installed globally but local is what's used)
+
+3. Created obfuscation build script:
+     C:\Users\skacar\Documents\horse_race\horserace_organizesB\obfuscate_build.js
+   - Obfuscates all .js files using base64 string encoding, hex identifiers, self-defending
+   - Copies all other files (MP3, CSS, HTML, images) as-is
+   - Outputs everything into the dist/ folder
+
+4. Ran the build:
+     cd C:\Users\skacar\Documents\horse_race\horserace_organizesB
+     node obfuscate_build.js
+   This creates/updates the dist/ folder
+
+5. Initialized git in dist/ folder and pushed to private GitHub repo:
+     cd C:\Users\skacar\Documents\horse_race\horserace_organizesB\dist
+     git init
+     git add .
+     git commit -m "Initial deploy"
+     git branch -M main
+     git remote add origin https://github.com/sedatkacar56/horserace.git
+     git push -u origin main
+
+6. Connected Cloudflare Pages to the private GitHub repo:
+   - Framework: None
+   - Build command: (empty)
+   - Build output directory: (empty)
+   - Branch: main
+   - Cloudflare auto-deploys whenever main branch is pushed
+
+----------------------------------------------------
+HOW TO UPDATE THE GAME (future workflow)
+----------------------------------------------------
+When you make changes to your game code:
+
+1. Edit files in horserace_organizesB (NOT the original folder)
+2. Run obfuscation:
+     cd C:\Users\skacar\Documents\horse_race\horserace_organizesB
+     node obfuscate_build.js
+3. Push obfuscated dist to GitHub:
+     cd C:\Users\skacar\Documents\horse_race\horserace_organizesB\dist
+     git add .
+     git commit -m "Update"
+     git push
+4. Cloudflare auto-deploys within ~30 seconds
+5. Live at https://horserace-146.pages.dev/
+
+----------------------------------------------------
+CODE PROTECTION NOTES
+----------------------------------------------------
+- Original readable code stays LOCAL ONLY (horserace_organizes + horserace_organizesB)
+- GitHub repo only contains obfuscated dist/ code
+- Cloudflare serves obfuscated code to users
+- Visitors cannot read the logic even via browser DevTools (F12)
+- JS is obfuscated with: hex identifiers, base64 string arrays, self-defending mode
+- MP3/CSS/HTML cannot be meaningfully "stolen" anyway
+
+----------------------------------------------------
+TOOLS & VERSIONS
+----------------------------------------------------
+Node.js: v24.11.0
+npm: 11.6.1
+javascript-obfuscator: 5.4.1
+====================================================
